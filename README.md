@@ -1,39 +1,58 @@
 # Discord AI Community Summary Bot
 
-An AI-powered summary bot for a gaming Discord community. It reads every text channel visible to the bot and produces an evidence-based community digest.
+An AI-powered summary bot for gaming Discord communities. It scans every accessible text channel in a server and can produce manual or scheduled digests.
 
-## Commands
+## Features
 
-- `/summary`: Summarize the last 24 hours across all accessible channels. Options: `hours`, `channel`, and `include_bots`.
-- `/summary-schedule`: Administrators can enable or disable recurring summaries and configure interval, lookback, and output channel.
-- `/health`: Show gateway and AI configuration status.
+- `/summary [hours] [channel] [include_bots]`
+- `/summary-schedule` with enable, disable, status, output channel, lookback, and interval
+- `/health`
+- Overview, topics/games, highlights, decisions, action items, unanswered questions, sentiment, risks, active participants, links, and coverage
+- OpenAI-compatible provider support
+- Extractive fallback when no AI API key is configured
+- Permission-aware channel collection across the guild
+- JSON schedule persistence at `data/summary-schedules.json`
+- HTTP health endpoint at `GET /health`
 
-## Output
+## Architecture
 
-Every summary includes:
+```text
+Discord Gateway
+  -> discord.js client
+  -> slash-command handlers
+  -> summary-service message collection
+  -> ai-summary provider/fallback analysis
+  -> Discord embed delivery
+```
 
-- Overview and coverage statistics
-- Topics and active games
-- Key highlights
-- Decisions
-- Action items
-- Unanswered topics
-- Sentiment
-- Risks
-- Active participants
+The scheduler checks schedules every 15 minutes and sends a digest only after each configured interval.
 
 ## Setup
 
-1. Copy `.env.sample` to `.env`.
-2. Set `DISCORD_TOKEN` and `DISCORD_CLIENT_ID`. For guild-only testing, set `DISCORD_GUILD_ID`.
-3. Optionally configure `AI_PROVIDER_URL`, `AI_API_KEY`, and `AI_MODEL`.
-4. In the Discord Developer Portal, enable the bot's `bot` scope and these gateway application permissions:
-   - View Channels
-   - Read Message History
-   - Send Messages
-   - Use Slash Commands
-   - Optionally Read Message Content
-5. Install dependencies and register commands:
+1. Use Node.js 18 or newer.
+2. Create a Discord application and bot at the Discord Developer Portal.
+3. Enable Message Content Intent.
+4. Grant the bot View Channels, Read Message History, and Send Messages permissions.
+5. Copy `.env.example` to `.env`.
+6. Set at least:
+
+```env
+DISCORD_TOKEN=your_bot_token
+DISCORD_CLIENT_ID=your_application_id
+```
+
+For one guild during development, set `DISCORD_GUILD_ID`; omit it to register commands globally.
+
+Optional AI settings:
+
+```env
+AI_PROVIDER_URL=https://api.openai.com/v1/chat/completions
+AI_API_KEY=your_api_key
+AI_MODEL=gpt-4o-mini
+MAX_MESSAGES_PER_CHANNEL=3000
+```
+
+## Run
 
 ```powershell
 npm install
@@ -41,22 +60,4 @@ npm run register
 npm start
 ```
 
-The bot uses an extractive fallback summary when no AI API key is configured. For real AI analysis, configure an OpenAI-compatible chat-completions endpoint.
-
-## Architecture
-
-```text
-Discord Gateway
-    -> app.js (slash commands and scheduler)
-       -> src/summary-service.js (permission-aware multi-channel collection)
-       -> src/ai-summary.js (AI analysis or local fallback)
-       -> Discord embed delivery
-```
-
-Scheduled configuration is persisted in `data/summary-schedules.json`. The scheduler checks enabled guilds every 15 minutes. Human and bot filtering, lookback limits, output channel selection, and message collection are handled server-side.
-
-HTTP health endpoint:
-
-```text
-GET /health
-```
+Expose port `3000` (or your configured `PORT`) if you use the HTTP health endpoint in a hosted environment.

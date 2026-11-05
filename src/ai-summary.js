@@ -1,89 +1,104 @@
-export function buildFallbackSummary(messages, hours, channelCount, botFiltered) {
-  const visible = messages.filter((message) => message.author && !message.author.bot);
-  const byAuthor = new Map();
-  const terms = new Map();
-  const noise = new Set(['the', 'and', 'for', 'that', 'with', 'this', 'you', 'from', 'have', 'are', 'was', 'but']);
+const stopWords = new Set(['yang', 'dan', 'untuk', 'dengan', 'dari', 'ini', 'itu', 'akan', 'lagi', 'the', 'and', 'for', 'with', 'from', 'this', 'that']);
 
-  for (const message of visible) {
-    const name = message.author.username;
-    byAuthor.set(name, (byAuthor.get(name) || 0) + 1);
-    for (const word of message.cleanContent.toLowerCase().match(/[a-z0-9]{4,}/g) || []) {
-      if (!noise.has(word)) terms.set(word, (terms.get(word) || 0) + 1);
+function unique(items, limit = 8) {
+  return [...new Set(items.map((item) => item.trim()).filter(Boolean))].slice(0, limit);
+}
+
+export function extractiveSummary(messages, hours) {
+  const texts = messages.map((message) => `${message.author}: ${message.content}`).filter((text) => text.length > 4);
+  const participants = new Map();
+  const games = new Map();
+  const links = new Set();
+
+  for (const message of messages) {
+    if (!message.authorBot) participants.set(message.author, (participants.get(message.author) || 0) + 1);
+    for (const word of message.content.match(/[A-Za-z][A-Za-z0-9 -]{2,}/g) || []) {
+      const normalized = word.trim().toLowerCase();
+      if (!stopWords.has(normalized) && normalized.length >= 4) games.set(normalized, (games.get(normalized) || 0) + 1);
     }
+    for (const match of message.content.match(/https?:\/\/\S+/g) || []) links.add(match.replace(/[)>.,]+$/, ''));
   }
 
-  const participants = [...byAuthor.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
-  const topics = [...terms.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([word]) => word);
-  const samples = visible
-    .slice(-12)
-    .map((message) => `- #${message.channel.name}: ${message.author.username}: ${message.cleanContent.slice(0, 180)}`)
-    .join('\n');
+  const topParticipants = [...participants.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10)
+    .map(([name, count]) => `${name} (${count})`);
+  const topics = [...games.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([name]) => name);
+  const questionCandidates = messages.filter((message) => /\?|help|minta|bantu|gimana|bagaimana/i.test(message.content))
+    .map((message) => message.content).slice(0, 6);
 
   return {
-    title: `Community digest - last ${hours} hour${hours === 1 ? '' : 's'}`,
-    overview: `Collected ${visible.length} human messages from ${channelCount} channel${channelCount === 1 ? '' : 's'}${botFiltered ? ' (bot messages excluded)' : ''}.`,
-    topics: topics.length ? topics.join(', ') : 'No clear recurring topics were detected.',
-    highlights: samples || 'No substantive messages were found in the requested period.',
-    decisions: 'No explicit decisions could be identified without an AI provider.',
-    actions: 'No explicit action items could be identified without an AI provider.',
-    unanswered: 'No unanswered questions could be classified without an AI provider.',
-    sentiment: 'Mixed/unknown; configure AI_PROVIDER_URL and AI_API_KEY for AI sentiment analysis.',
-    participants: participants.length ? participants.map(([name, count]) => `${name} (${count})`).join(', ') : 'No human participants.',
+    overview: `${messages.length} pesan dari ${participants.size} pengguna aktif dalam ${hours} jam terakhir.`,
+    topicsAndGames: unique(topics, 10),
+    highlights: unique(texts.filter((text) => /raid|event|win|menang|match|tournament|turnamen|update/i.test(text)).slice(0, 6), 6),
+    decisions: [],
+    actionItems: [],
+    unansweredQuestions: unique(questionCandidates, 6),
+    sentiment: {
+      tone: 'Campuran/netral',
+      evidence: messages.length ? 'Ringkasan berbasis frekuensi kata karena mode AI lokal aktif.' : 'Belum ada aktivitas.',
+    },
+    risks: unique(messages.filter((message) => /toxic|spam|report|bug|scam|hack|cheat/i.test(message.content)).map((message) => message.content).slice(0, 6), 6),
+    activeParticipants: topParticipants,
+    links: [...links].slice(0, 8),
+    coverage: {
+      messageCount: messages.length,
+      channelCount: new Set(messages.map((message) => message.channelName)).size,
+      participantCount: participants.size,
+      botMessagesExcluded: messages.filter((message) => message.authorBot).length ? false : true,
+    },
   };
 }
 
-export async function summarizeWithAI(messages, options, aiConfig) {
-  if (!aiConfig.apiKey) return buildFallbackSummary(messages, options.hours, options.channelCount, options.excludeBots);
+function normalizeResult(value, fallback) {
+  const result = value && typeof value === 'object' ? value : {};
+  return {
+    overview: typeof result.overview === 'string' ? result.overview : fallback.overview,
+    topicsAndGames: Array.isArray(result.topicsAndGames) ? result.topicsAndGames.map(String) : fallback.topicsAndGames,
+    highlights: Array.isArray(result.highlights) ? result.highlights.map(String) : fallback.highlights,
+    decisions: Array.isArray(result.decisions) ? result.decisions.map(String) : [],
+    actionItems: Array.isArray(result.actionItems) ? result.actionItems.map(String) : [],
+    unansweredQuestions: Array.isArray(result.unansweredQuestions) ? result.unansweredQuestions.map(String) : fallback.unansweredQuestions,
+    sentiment: result.sentiment && typeof result.sentiment === 'object'
+      ? { tone: String(result.sentiment.tone || fallback.sentiment.tone), evidence: String(result.sentiment.evidence || fallback.sentiment.evidence) }
+      : fallback.sentiment,
+    risks: Array.isArray(result.risks) ? result.risks.map(String) : [],
+    activeParticipants: Array.isArray(result.activeParticipants) ? result.activeParticipants.map(String) : fallback.activeParticipants,
+    links: Array.isArray(result.links) ? result.links.map(String) : fallback.links,
+    coverage: fallback.coverage,
+  };
+}
 
-  const transcript = messages
-    .filter((message) => message.author && (options.excludeBots ? !message.author.bot : true))
-    .map((message) => `[${message.createdAt.toISOString()}] #${message.channel.name} ${message.author.username}: ${message.cleanContent}`)
-    .join('\n')
-    .slice(-180000);
+export async function summarizeMessages(messages, hours) {
+  const fallback = extractiveSummary(messages, hours);
+  if (!process.env.AI_API_KEY) return { ...fallback, mode: 'extractive' };
 
-  const prompt = `Analyze this gaming community transcript for the last ${options.hours} hours across all accessible channels.
-Return strict JSON with keys: title, overview, topics (array), highlights (array), decisions (array),
-actions (array), unanswered (array), sentiment, participants (array), risks (array).
-Include active games, events, technical issues, moderation themes, member needs, and ambiguity.
-Do not invent facts. If a section has no evidence, use an empty array or "Not detected".`;
+  const sample = messages.slice(-800).map((message) =>
+    `[${message.createdAt.toISOString()}] #${message.channelName} ${message.author}: ${message.content.replace(/\s+/g, ' ').slice(0, 1200)}`,
+  ).join('\n').slice(-180000);
 
-  const response = await fetch(aiConfig.providerUrl, {
+  const response = await fetch(process.env.AI_PROVIDER_URL, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${aiConfig.apiKey}`,
+      Authorization: `Bearer ${process.env.AI_API_KEY}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: aiConfig.model,
-      temperature: 0.2,
+      model: process.env.AI_MODEL || 'gpt-4o-mini',
       response_format: { type: 'json_object' },
+      temperature: 0.2,
       messages: [
-        { role: 'system', content: prompt },
-        { role: 'user', content: transcript || 'No messages found in the requested period.' },
+        {
+          role: 'system',
+          content: 'You are an analyst for a gaming Discord community. Analyze only supplied messages. Return valid JSON with keys: overview, topicsAndGames, highlights, decisions, actionItems, unansweredQuestions, sentiment ({tone,evidence}), risks, activeParticipants, links. Keep claims grounded in the messages and redact secrets or access tokens.',
+        },
+        { role: 'user', content: `Summarize the last ${hours} hours. Messages:\n${sample || 'No messages found.'}` },
       ],
     }),
   });
 
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`AI provider returned ${response.status}: ${body.slice(0, 300)}`);
-  }
-
+  if (!response.ok) throw new Error(`AI provider returned ${response.status}: ${await response.text()}`);
   const data = await response.json();
-  const raw = data.choices?.[0]?.message?.content;
-  if (!raw) throw new Error('AI provider returned no summary content');
-
-  const parsed = JSON.parse(raw);
-  return {
-    title: parsed.title || `Community digest - last ${options.hours} hours`,
-    overview: parsed.overview || 'Not detected',
-    topics: Array.isArray(parsed.topics) ? parsed.topics.join(', ') : String(parsed.topics || 'Not detected'),
-    highlights: Array.isArray(parsed.highlights) ? parsed.highlights.map((item) => `- ${item}`).join('\n') : String(parsed.highlights || 'Not detected'),
-    decisions: Array.isArray(parsed.decisions) ? parsed.decisions.map((item) => `- ${item}`).join('\n') : String(parsed.decisions || 'Not detected'),
-    actions: Array.isArray(parsed.actions) ? parsed.actions.map((item) => `- ${item}`).join('\n') : String(parsed.actions || 'Not detected'),
-    unanswered: Array.isArray(parsed.unanswered) ? parsed.unanswered.map((item) => `- ${item}`).join('\n') : String(parsed.unanswered || 'Not detected'),
-    sentiment: parsed.sentiment || 'Not detected',
-    participants: Array.isArray(parsed.participants) ? parsed.participants.join(', ') : String(parsed.participants || 'Not detected'),
-    risks: Array.isArray(parsed.risks) ? parsed.risks.map((item) => `- ${item}`).join('\n') : String(parsed.risks || 'Not detected'),
-  };
+  const content = data.choices?.[0]?.message?.content;
+  let parsed;
+  try { parsed = JSON.parse(content); } catch { throw new Error('AI provider returned invalid JSON'); }
+  return { ...normalizeResult(parsed, fallback), mode: 'ai' };
 }

@@ -1,37 +1,54 @@
 import 'dotenv/config';
-import { REST, Routes, SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
+import {
+  PermissionFlagsBits,
+  REST,
+  Routes,
+  SlashCommandBuilder,
+} from 'discord.js';
 
 const commands = [
   new SlashCommandBuilder()
     .setName('summary')
-    .setDescription('Summarize gaming community activity across all accessible channels')
-    .addIntegerOption((option) => option.setName('hours').setDescription('Lookback window (1-168 hours)').setMinValue(1).setMaxValue(168))
-    .addChannelOption((option) => option.setName('channel').setDescription('Optional: summarize one channel instead of all channels'))
-    .addBooleanOption((option) => option.setName('include_bots').setDescription('Include bot/system service messages')),
+    .setDescription('Ringkas aktivitas komunitas gaming')
+    .addIntegerOption((option) =>
+      option.setName('hours').setDescription('Rentang waktu 1-168 jam').setMinValue(1).setMaxValue(168),
+    )
+    .addChannelOption((option) =>
+      option.setName('channel').setDescription('Batasi ringkasan ke satu channel'),
+    )
+    .addBooleanOption((option) =>
+      option.setName('include_bots').setDescription('Sertakan pesan bot'),
+    ),
 
   new SlashCommandBuilder()
     .setName('summary-schedule')
-    .setDescription('Configure recurring community summaries')
+    .setDescription('Kelola ringkasan berkala server ini')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-    .addBooleanOption((option) => option.setName('enabled').setDescription('Enable the schedule').setRequired(true))
-    .addIntegerOption((option) => option.setName('every_hours').setDescription('Run every 1-168 hours').setMinValue(1).setMaxValue(168))
-    .addChannelOption((option) => option.setName('output_channel').setDescription('Channel that receives scheduled summaries'))
-    .addIntegerOption((option) => option.setName('lookback_hours').setDescription('Message lookback window (1-168 hours)').setMinValue(1).setMaxValue(168)),
+    .addStringOption((option) =>
+      option.setName('action').setDescription('Tindakan jadwal').setRequired(true)
+        .addChoices(
+          { name: 'Enable', value: 'enable' },
+          { name: 'Disable', value: 'disable' },
+          { name: 'Status', value: 'status' },
+        ),
+    )
+    .addChannelOption((option) =>
+      option.setName('output_channel').setDescription('Channel tujuan ringkasan'),
+    )
+    .addIntegerOption((option) =>
+      option.setName('hours').setDescription('Rentang ringkasan 1-168 jam').setMinValue(1).setMaxValue(168),
+    )
+    .addIntegerOption((option) =>
+      option.setName('interval').setDescription('Interval kirim dalam jam').setMinValue(1).setMaxValue(168),
+    ),
 
-  new SlashCommandBuilder()
-    .setName('health')
-    .setDescription('Show bot, AI, and summary service status'),
+  new SlashCommandBuilder().setName('health').setDescription('Periksa status bot'),
 ].map((command) => command.toJSON());
 
-const token = process.env.DISCORD_TOKEN;
-const clientId = process.env.DISCORD_CLIENT_ID;
-const guildId = process.env.DISCORD_GUILD_ID;
-if (!token || !clientId) throw new Error('DISCORD_TOKEN and DISCORD_CLIENT_ID are required');
-
-const rest = new REST({ version: '10' }).setToken(token);
-const route = guildId
-  ? Routes.applicationGuildCommands(clientId, guildId)
-  : Routes.applicationCommands(clientId);
+const rest = new REST().setToken(process.env.DISCORD_TOKEN);
+const route = process.env.DISCORD_GUILD_ID
+  ? Routes.applicationGuildCommands(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_GUILD_ID)
+  : Routes.applicationCommands(process.env.DISCORD_CLIENT_ID);
 
 await rest.put(route, { body: commands });
-console.log(`Registered ${commands.length} slash command(s) ${guildId ? `for guild ${guildId}` : 'globally'}.`);
+console.log(`Registered ${commands.length} slash commands.`);
