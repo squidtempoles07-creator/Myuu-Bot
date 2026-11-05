@@ -1,8 +1,8 @@
 {
-  "name": "discord-getting-started",
+  "name": "discord-ai-community-summary-bot",
   "private": true,
   "version": "1.0.0",
-  "description": "Discord example app",
+  "description": "AI-powered Discord gaming community summary bot",
   "main": "app.js",
   "type": "module",
   "engines": {
@@ -16,7 +16,7 @@
   "author": "Shay DeWael",
   "license": "MIT",
   "dependencies": {
-    "discord-interactions": "^4.0.0",
+    "discord.js": "^14.22.1",
     "dotenv": "^16.0.3",
     "express": "^4.18.2"
   },
