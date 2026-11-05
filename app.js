@@ -17,6 +17,11 @@ const PORT = Number(process.env.PORT || 3000);
 const schedulePath = join(process.cwd(), 'data', 'summary-schedules.json');
 const app = express();
 
+if (!process.env.DISCORD_TOKEN) {
+  console.error('DISCORD_TOKEN belum diisi di .env.');
+  process.exit(1);
+}
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -219,7 +224,10 @@ app.listen(PORT, () => console.log(`Health server listening on port ${PORT}`));
 
 client.login(process.env.DISCORD_TOKEN).catch((error) => {
   console.error('Discord login failed:', error);
-  process.exitCode = 1;
+  if (String(error?.message || '').includes('disallowed intents')) {
+    console.error('Aktifkan Message Content Intent di Discord Developer Portal > Bot > Privileged Gateway Intents, lalu mulai ulang bot.');
+  }
+  process.exit(1);
 });
 
 setInterval(runScheduledSummaries, 15 * 60 * 1000).unref();

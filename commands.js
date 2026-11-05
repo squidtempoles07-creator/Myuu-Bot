@@ -46,9 +46,24 @@ const commands = [
 ].map((command) => command.toJSON());
 
 const rest = new REST().setToken(process.env.DISCORD_TOKEN);
+const applicationId = process.env.DISCORD_CLIENT_ID || process.env.APP_ID;
+
+if (!process.env.DISCORD_TOKEN) {
+  throw new Error('DISCORD_TOKEN belum diisi di .env.');
+}
+if (!applicationId) {
+  throw new Error('DISCORD_CLIENT_ID belum diisi di .env (atau APP_ID sebagai nama lama).');
+}
+if (!/^\d{17,20}$/.test(applicationId)) {
+  throw new Error('DISCORD_CLIENT_ID/APP_ID harus berupa Discord Application ID (angka/snowflake).');
+}
+if (process.env.DISCORD_GUILD_ID && !/^\d{17,20}$/.test(process.env.DISCORD_GUILD_ID)) {
+  throw new Error('DISCORD_GUILD_ID harus berupa Discord Server ID (angka/snowflake), atau dikosongkan.');
+}
+
 const route = process.env.DISCORD_GUILD_ID
-  ? Routes.applicationGuildCommands(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_GUILD_ID)
-  : Routes.applicationCommands(process.env.DISCORD_CLIENT_ID);
+  ? Routes.applicationGuildCommands(applicationId, process.env.DISCORD_GUILD_ID)
+  : Routes.applicationCommands(applicationId);
 
 await rest.put(route, { body: commands });
 console.log(`Registered ${commands.length} slash commands.`);
