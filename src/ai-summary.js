@@ -75,30 +75,42 @@ export async function summarizeMessages(messages, hours) {
     `[${message.createdAt.toISOString()}] #${message.channelName} ${message.author}: ${message.content.replace(/\s+/g, ' ').slice(0, 1200)}`,
   ).join('\n').slice(-180000);
 
-  const response = await fetch(process.env.AI_PROVIDER_URL, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${process.env.AI_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: process.env.AI_MODEL || 'gpt-4o-mini',
-      response_format: { type: 'json_object' },
-      temperature: 0.2,
-      messages: [
-        {
-          role: 'system',
-          content: 'You are an analyst for a gaming Discord community. Analyze only supplied messages. Return valid JSON with keys: overview, topicsAndGames, highlights, decisions, actionItems, unansweredQuestions, sentiment ({tone,evidence}), risks, activeParticipants, links. Keep claims grounded in the messages and redact secrets or access tokens.',
-        },
-        { role: 'user', content: `Summarize the last ${hours} hours. Messages:\n${sample || 'No messages found.'}` },
-      ],
-    }),
-  });
+  try {
+    const response = await fetch(process.env.AI_PROVIDER_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.AI_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: process.env.AI_MODEL || 'gpt-4o-mini',
+        response_format: { type: 'json_object' },
+        temperature: 0.2,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an analyst for a gaming Discord community. Analyze only supplied messages. Return valid JSON with keys: overview, topicsAndGames, highlights, decisions, actionItems, unansweredQuestions, sentiment ({tone,evidence}), risks, activeParticipants, links. Keep claims grounded in the messages and redact secrets or access tokens.',
+          },
+          { role: 'user', content: `Summarize the last ${hours} hours. Messages:\n${sample || 'No messages found.'}` },
+        ],
+      }),
+    });
 
-  if (!response.ok) throw new Error(`AI provider returned ${response.status}: ${await response.text()}`);
-  const data = await response.json();
-  const content = data.choices?.[0]?.message?.content;
-  let parsed;
-  try { parsed = JSON.parse(content); } catch { throw new Error('AI provider returned invalid JSON'); }
-  return { ...normalizeResult(parsed, fallback), mode: 'ai' };
+    if (!response.ok) {
+      const detail = await response.text();
+      console.warn(`AI provider returned ${response.status}; using extractive fallback: ${detail.slice(0, 300)}`);
+      return { ...fallback, mode: 'extractive' };
+    }
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+    let parsed;
+    try { parsed = JSON.parse(content); } catch {
+      console.warn('AI provider returned invalid JSON; using extractive fallback.');
+      return { ...fallback, mode: 'extractive' };
+    }
+    return { ...normalizeResult(parsed, fallback), mode: 'ai' };
+  } catch (error) {
+    console.warn('AI provider unavailable; using extractive fallback:', error?.message || error);
+    return { ...fallback, mode: 'extractive' };
+  }
 }
