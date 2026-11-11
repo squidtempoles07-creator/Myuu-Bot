@@ -1,3 +1,4 @@
+import { startGateway } from './gateway.js';
 import 'dotenv/config';
 import express from 'express';
 import {
@@ -67,5 +68,9 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 });
 
 app.listen(PORT, () => {
-  console.log('Listening on port', PORT);
+    console.log('Listening on port', PORT);
+
+    startGateway().catch((error) => {
+        console.error('[Gateway Startup Error]', error);
+    });
 });
