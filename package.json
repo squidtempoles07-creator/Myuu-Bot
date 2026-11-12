@@ -11,6 +11,7 @@
   "scripts": {
     "start": "node app.js",
     "register": "node commands.js",
+    "clear:guild": "node clear-guild-commands.js",
     "dev": "nodemon app.js"
   },
   "author": "Shay DeWael",
