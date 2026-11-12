@@ -14,9 +14,7 @@ export async function startGateway() {
 
     const client = new Client({
         intents: [
-            GatewayIntentBits.Guilds,
-            GatewayIntentBits.GuildMessages,
-            GatewayIntentBits.MessageContent
+            GatewayIntentBits.Guilds
         ]
     });
 
@@ -24,18 +22,6 @@ export async function startGateway() {
         console.log(
             `[Gateway] Logged in as ${readyClient.user.tag}`
         );
-    });
-
-    client.on(Events.MessageCreate, (message) => {
-        // Ignore messages from bots
-        if (message.author.bot) return;
-
-        console.log('------------------------------');
-        console.log(`[Guild] ${message.guild?.name ?? 'DM'}`);
-        console.log(`[Channel] ${message.channel.name ?? message.channelId}`);
-        console.log(`[User] ${message.author.tag}`);
-        console.log(`[Message] ${message.content}`);
-        console.log('------------------------------');
     });
 
     client.on(Events.Error, (error) => {
