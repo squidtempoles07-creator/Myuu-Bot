@@ -134,13 +134,13 @@ Do not invent information.
  *
  * @param {AsyncIterable<Array<Object>>} messageBatches
  * @param {Object} options
- * @param {string} [options.language='Indonesian']
+ * @param {string} [options.language='English']
  * @param {number} [options.chunkCharacterLimit=12000]
  */
 export async function generateCommunitySummary(
     messageBatches,
     {
-        language = 'Indonesian',
+        language = 'English',
         chunkCharacterLimit = 12000
     } = {}
 ) {
@@ -185,7 +185,7 @@ export async function generateCommunitySummary(
 
     if (partialSummaries.length === 0) {
         return {
-            summary: 'Tidak ada pesan yang dapat dirangkum.',
+            summary: 'No messages to summarize.',
             processedMessages: 0,
             processedChunks: 0
         };
