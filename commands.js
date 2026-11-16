@@ -26,24 +26,45 @@ const TEST_COMMAND = {
   contexts: [0, 1, 2],
 };
 
-// Command containing options
-const CHALLENGE_COMMAND = {
-  name: 'challenge',
-  description: 'Challenge to a match of rock paper scissors',
+const SUMMARY_COMMAND = {
+  name: 'summary',
+  description: 'Generate an AI summary of a Discord channel',
   options: [
     {
-      type: 3,
-      name: 'object',
-      description: 'Pick your object',
+      type: 7,
+      name: 'channel',
+      description: 'The channel to summarize',
       required: true,
-      choices: createCommandChoices(),
+      channel_types: [0, 5],
+    },
+    {
+      type: 3,
+      name: 'start_date',
+      description: 'Start date (YYYY-MM-DD)',
+      required: true,
+    },
+    {
+      type: 3,
+      name: 'end_date',
+      description: 'End date (YYYY-MM-DD)',
+      required: true,
+    },
+    {
+      type: 3,
+      name: 'language',
+      description: 'Summary language',
+      required: false,
+      choices: [
+        { name: 'English', value: 'English' },
+        { name: 'Indonesian', value: 'Indonesian' },
+      ],
     },
   ],
   type: 1,
-  integration_types: [0, 1],
-  contexts: [0, 2],
+  integration_types: [0],
+  contexts: [0],
 };
 
-const ALL_COMMANDS = [TEST_COMMAND, CHALLENGE_COMMAND];
+const ALL_COMMANDS = [TEST_COMMAND, SUMMARY_COMMAND];
 
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);
