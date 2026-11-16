@@ -19,6 +19,8 @@ const PORT = process.env.PORT || 3000;
 // To keep track of our active games
 const activeGames = {};
 
+let discordClient = null;
+
 /**
  * Interactions endpoint URL where Discord will send HTTP requests
  * Parse request body and verifies incoming requests using discord-interactions package
@@ -67,10 +69,24 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
   return res.status(400).json({ error: 'unknown interaction type' });
 });
 
-app.listen(PORT, () => {
-    console.log('Listening on port', PORT);
+async function startApp() {
+    try {
+        discordClient = await startGateway();
 
-    startGateway().catch((error) => {
-        console.error('[Gateway Startup Error]', error);
-    });
-});
+        app.listen(PORT, () => {
+            console.log('Listening on port', PORT);
+        });
+    } catch (error) {
+        console.error('[Application Startup Error]', error);
+    }
+}
+
+startApp();
+
+// app.listen(PORT, () => {
+//     console.log('Listening on port', PORT);
+
+//     startGateway().catch((error) => {
+//         console.error('[Gateway Startup Error]', error);
+//     });
+// });
