@@ -188,10 +188,12 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
                 ''
             ].join('\n');
 
-            const remainingCharacters = 2000 - header.length - 50;
+            const truncationNotice = '\n\n[Summary truncated. Full summary saved in CSV.]';
+
+            const remainingCharacters = 2000 - header.length - truncationNotice.length;
 
             const summaryText = result.summary.length > remainingCharacters
-                ? `${result.summary.slice(0, remainingCharacters)}\n\n[Summary truncated. Full summary saved in CSV.]`
+                ? `${result.summary.slice(0, remainingCharacters)}${truncationNotice}`
                 : result.summary;
 
             await DiscordRequest(
