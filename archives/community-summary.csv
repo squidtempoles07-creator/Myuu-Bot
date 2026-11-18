@@ -1,0 +1,13 @@
+"summary_id","guild_id","guild_name","selected_channels","period_start","period_end","total_messages","human_messages","bot_messages","unique_users","messages_with_attachments","edited_messages","channel_statistics","top_contributors","summary","processed_messages","processed_chunks","created_at"
+"4629de69-4520-426d-8d5f-d878ec2e3762","1567755149470994552","Myuuuu's server","[{""id"":""1567755159713480858"",""name"":""general""}]","2026-11-05T00:00:00.000Z","2026-11-17T23:59:59.999Z","36","21","15","2","2","1","[{""channelId"":""1567755159713480858"",""channelName"":""general"",""messageCount"":36}]","[{""authorId"":""1123236859053625455"",""authorName"":""myuuucel."",""messageCount"":20},{""authorId"":""428519138445754378"",""authorName"":""zoelart"",""messageCount"":1}]","Here is a summary of the provided Discord conversation:
+
+### Main Topics and Discussions
+* **Bot Testing and Execution:** The primary activity revolves around user `myuuucel.` attempting to run the `/summary` command using the bot ""The Curious Myuu.""
+* **Wordle Game Activity:** Automatic updates and gameplay logs from the Wordle bot.
+
+### Important Events and Announcements
+* **Wordle Streak","36","1","2026-11-17T02:44:32.965Z"
+"cafefd7a-1015-485b-93b8-4538fb91496f","1567755149470994552","Myuuuu's server","[{""id"":""1567755159713480858"",""name"":""general""}]","2026-11-05T00:00:00.000Z","2026-11-18T23:59:59.999Z","41","25","16","2","2","1","[{""channelId"":""1567755159713480858"",""channelName"":""general"",""messageCount"":41}]","[{""authorId"":""1123236859053625455"",""authorName"":""myuuucel."",""messageCount"":24},{""authorId"":""428519138445754378"",""authorName"":""zoelart"",""messageCount"":1}]","Here is a factual summary of the provided Discord conversation:
+
+### Main Topics and Discussions
+* **Bot Command Testing and Troubleshooting:** User `myuuucel.` repeatedly attempted to invoke the `/summary` command using the bot `The Curious Myuu`. The bot initially failed with multiple errors—including invalid date formatting, an expired API key (HTTP 401), exhausted API billing credits (HTTP 429),","41","1","2026-11-18T07:40:11.447Z"
