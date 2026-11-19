@@ -1,5 +1,6 @@
 
-import { mkdir, stat, appendFile } from 'node:fs/promises';
+// import { mkdir, stat, appendFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
 
@@ -76,12 +77,7 @@ function createCsvRow(values) {
  * @param {Object} options
  * @param {string} [options.filePath]
  */
-export async function exportSummaryToCsv(
-    record,
-    {
-        filePath = createSummaryCsvPath(record.guildName, record.createdAt)
-    } = {}
-) {
+export async function exportSummaryToCsv(record, options = {}) {
     if (!record || typeof record !== 'object') {
         throw new Error('Summary record is required.');
     }
@@ -98,6 +94,11 @@ export async function exportSummaryToCsv(
 
     const summaryId = record.summaryId || randomUUID();
     const createdAt = record.createdAt || new Date().toISOString();
+
+    const filePath = options.filePath || createSummaryCsvPath(
+        record.guildName,
+        createdAt
+    );
 
     const values = [
         summaryId,
