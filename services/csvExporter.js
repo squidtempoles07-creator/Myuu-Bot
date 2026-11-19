@@ -1,5 +1,3 @@
-
-// import { mkdir, stat, appendFile } from 'node:fs/promises';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -20,6 +18,27 @@ function createSummaryCsvPath(guildName, createdAt) {
         .replace(/:/g, '-');
 
     return `archives/summary - ${date} - ${safeGuildName}.csv`;
+}
+
+function createSummaryCsvPathWithSuffix(filePath, suffix) {
+    if (suffix === 0) {
+        return filePath;
+    }
+
+    const extension = '.csv';
+    const basePath = filePath.slice(0, -extension.length);
+
+    return `${basePath} (${suffix})${extension}`;
+}
+
+function getUniqueFilePath(filePath) {
+    const extension = '.csv';
+    const basePath = filePath.slice(0, -extension.length);
+
+    return {
+        basePath,
+        extension
+    };
 }
 
 const CSV_HEADERS = [
