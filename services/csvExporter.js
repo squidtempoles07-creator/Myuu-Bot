@@ -3,7 +3,23 @@ import { mkdir, stat, appendFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
 
-const DEFAULT_CSV_PATH = 'archives/community-summary.csv';
+// const DEFAULT_CSV_PATH = 'archives/community-summary.csv';
+
+function createSummaryCsvPath(guildName, createdAt) {
+    const safeGuildName = (guildName || 'Unknown Guild')
+        .replace(/[<>:"/\\|?*\x00-\x1F]/g, '-')
+        .replace(/[. ]+$/g, '')
+        .trim()
+        .slice(0, 80) || 'Unknown Guild';
+
+    const date = new Date(createdAt)
+        .toISOString()
+        .replace('T', ' ')
+        .replace(/\.\d{3}Z$/, '')
+        .replace(/:/g, '-');
+
+    return `archives/summary - ${date} - ${safeGuildName}.csv`;
+}
 
 const CSV_HEADERS = [
     'summary_id',
@@ -63,7 +79,7 @@ function createCsvRow(values) {
 export async function exportSummaryToCsv(
     record,
     {
-        filePath = DEFAULT_CSV_PATH
+        filePath = createSummaryCsvPath(record.guildName, record.createdAt)
     } = {}
 ) {
     if (!record || typeof record !== 'object') {
