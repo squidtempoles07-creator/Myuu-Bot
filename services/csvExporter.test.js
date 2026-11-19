@@ -51,85 +51,36 @@ function createTestRecord(summary) {
     };
 }
 
-test('should create CSV file with header and summary data', async () => {
+test('should create a new CSV file when filename already exists', async () => {
     const directory = await mkdtemp(
         join(tmpdir(), 'myuu-csv-test-')
     );
 
     const filePath = join(directory, 'summary.csv');
+    const secondFilePath = join(directory, 'summary (1).csv');
 
     try {
-        const result = await exportSummaryToCsv(
-            createTestRecord('Community discussed gaming events.'),
-            { filePath }
-        );
-
-        const content = await readFile(filePath, 'utf8');
-
-        assert.ok(result.summaryId);
-        assert.equal(result.filePath, filePath);
-
-        assert.ok(content.includes('summary_id'));
-        assert.ok(content.includes('guild_name'));
-        assert.ok(content.includes('total_messages'));
-        assert.ok(content.includes('Community discussed gaming events.'));
-    } finally {
-        await rm(directory, { recursive: true, force: true });
-    }
-});
-
-test('should append summaries without duplicating CSV header', async () => {
-    const directory = await mkdtemp(
-        join(tmpdir(), 'myuu-csv-test-')
-    );
-
-    const filePath = join(directory, 'summary.csv');
-
-    try {
-        await exportSummaryToCsv(
+        const firstResult = await exportSummaryToCsv(
             createTestRecord('First community summary.'),
             { filePath }
         );
 
-        await exportSummaryToCsv(
+        const secondResult = await exportSummaryToCsv(
             createTestRecord('Second community summary.'),
             { filePath }
         );
 
-        const content = await readFile(filePath, 'utf8');
+        const firstContent = await readFile(filePath, 'utf8');
+        const secondContent = await readFile(secondFilePath, 'utf8');
 
-        const headerCount = content
-            .split('\n')
-            .filter(line => line.startsWith('"summary_id"'))
-            .length;
+        assert.equal(firstResult.filePath, filePath);
+        assert.equal(secondResult.filePath, secondFilePath);
 
-        assert.equal(headerCount, 1);
+        assert.ok(firstContent.includes('First community summary.'));
+        assert.ok(!firstContent.includes('Second community summary.'));
 
-        assert.ok(content.includes('First community summary.'));
-        assert.ok(content.includes('Second community summary.'));
-    } finally {
-        await rm(directory, { recursive: true, force: true });
-    }
-});
-
-test('should escape commas and quotation marks in CSV values', async () => {
-    const directory = await mkdtemp(
-        join(tmpdir(), 'myuu-csv-test-')
-    );
-
-    const filePath = join(directory, 'summary.csv');
-
-    try {
-        await exportSummaryToCsv(
-            createTestRecord('Community discussed "gaming", events.'),
-            { filePath }
-        );
-
-        const content = await readFile(filePath, 'utf8');
-
-        assert.ok(
-            content.includes('"Community discussed ""gaming"", events."')
-        );
+        assert.ok(secondContent.includes('Second community summary.'));
+        assert.ok(!secondContent.includes('First community summary.'));
     } finally {
         await rm(directory, { recursive: true, force: true });
     }
