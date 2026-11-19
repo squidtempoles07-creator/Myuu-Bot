@@ -126,30 +126,14 @@ export async function exportSummaryToCsv(record, options = {}) {
 
     await mkdir(directory, { recursive: true });
 
-    let needsHeader = false;
+    const csvContent = [
+        createCsvRow(CSV_HEADERS),
+        createCsvRow(values)
+    ].join('\n');
 
-    try {
-        const fileInfo = await stat(absolutePath);
-        needsHeader = fileInfo.size === 0;
-    } catch (error) {
-        if (error.code !== 'ENOENT') {
-            throw error;
-        }
-
-        needsHeader = true;
-    }
-
-    const lines = [];
-
-    if (needsHeader) {
-        lines.push(createCsvRow(CSV_HEADERS));
-    }
-
-    lines.push(createCsvRow(values));
-
-    await appendFile(
+    await writeFile(
         absolutePath,
-        `${lines.join('\n')}\n`,
+        `${csvContent}\n`,
         'utf8'
     );
 
