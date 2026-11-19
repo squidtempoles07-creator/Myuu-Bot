@@ -31,16 +31,6 @@ function createSummaryCsvPathWithSuffix(filePath, suffix) {
     return `${basePath} (${suffix})${extension}`;
 }
 
-function getUniqueFilePath(filePath) {
-    const extension = '.csv';
-    const basePath = filePath.slice(0, -extension.length);
-
-    return {
-        basePath,
-        extension
-    };
-}
-
 const CSV_HEADERS = [
     'summary_id',
     'guild_id',
@@ -150,14 +140,35 @@ export async function exportSummaryToCsv(record, options = {}) {
         createCsvRow(values)
     ].join('\n');
 
-    await writeFile(
-        absolutePath,
-        `${csvContent}\n`,
-        'utf8'
-    );
+    let suffix = 0;
+    let savedPath;
+
+    while (true) {
+        const candidatePath = createSummaryCsvPathWithSuffix(
+            absolutePath,
+            suffix
+        );
+
+        try {
+            await writeFile(
+                candidatePath,
+                `${csvContent}\n`,
+                { encoding: 'utf8', flag: 'wx' }
+            );
+
+            savedPath = candidatePath;
+            break;
+        } catch (error) {
+            if (error.code !== 'EEXIST') {
+                throw error;
+            }
+
+            suffix++;
+        }
+    }
 
     return {
         summaryId,
-        filePath: absolutePath
+        filePath: savedPath
     };
 }
