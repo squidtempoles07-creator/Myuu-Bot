@@ -169,6 +169,7 @@ export async function exportSummaryToCsv(record, options = {}) {
 
     return {
         summaryId,
+        createdAt,
         filePath: savedPath
     };
 }
