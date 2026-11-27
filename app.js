@@ -180,6 +180,44 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
                 processedChunks: result.processedChunks
             });
 
+            try {
+                await sendSummaryToDashboard({
+                    summary_id: archive.summaryId,
+                    guild_id: req.body.guild_id,
+                    guild_name: channel.guild.name,
+                    channels: [
+                        {
+                            id: channel.id,
+                            name: channel.name
+                        }
+                    ],
+                    period_start: start.toISOString(),
+                    period_end: end.toISOString(),
+                    total_messages: statistics.totalMessages,
+                    human_messages: statistics.humanMessages,
+                    bot_messages: statistics.botMessages,
+                    unique_users: statistics.uniqueUsers,
+                    messages_with_attachments: statistics.messagesWithAttachments,
+                    channel_statistics: statistics.channels.map(item => ({
+                        channel_id: item.channelId,
+                        channel_name: item.channelName,
+                        message_count: item.messageCount
+                    })),
+                    top_contributors: statistics.topContributors.map(item => ({
+                        user_id: item.authorId,
+                        name: item.authorName,
+                        message_count: item.messageCount
+                    })),
+                    summary: result.summary,
+                    processed_messages: result.processedMessages,
+                    creatime: archive.createdAt
+                });
+
+                console.log('[Dashboard] Summary successfully saved.');
+            } catch (error) {
+                console.error('[Dashboard API Error]', error);
+            }
+
             const header = [
                 `**Community Summary — #${channel.name}**`,
                 `**Period:** ${options.start_date} to ${options.end_date} (UTC)`,
