@@ -1,4 +1,3 @@
-
 export async function sendSummaryToDashboard(payload) {
     const apiUrl = process.env.DASHBOARD_API_URL;
     const apiToken = process.env.DISCORD_SUMMARY_API_TOKEN;
