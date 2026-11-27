@@ -1,0 +1,22 @@
+"summary_id","guild_id","guild_name","selected_channels","period_start","period_end","total_messages","human_messages","bot_messages","unique_users","messages_with_attachments","edited_messages","channel_statistics","top_contributors","summary","processed_messages","processed_chunks","created_at"
+"740e2835-d229-4496-929d-4cbdbb048d1f","1567755149470994552","Myuuuu's server","[{""id"":""1567755159713480858"",""name"":""general""}]","2026-11-17T00:00:00.000Z","2026-11-19T23:59:59.999Z","23","18","5","2","0","0","[{""channelId"":""1567755159713480858"",""channelName"":""general"",""messageCount"":23}]","[{""authorId"":""428519138445754378"",""authorName"":""zoelart"",""messageCount"":10},{""authorId"":""1123236859053625455"",""authorName"":""myuuucel."",""messageCount"":8}]","Here is a summary and analysis of the Discord conversation:
+
+### Main Topics and Discussions
+* **Bot Malfunctions and `/summary` Command:** ""The Curious Myuu"" bot encountered repeated errors (formatting errors, expired API keys, exhausted credit quota, and fetch failures) before partially outputting a summary. Later, `zoelart` attempted to use the `/summary` command but was unable to access or execute it properly.
+* **Server/UI Visual Changes:** `myuuucel.` and `zoelart` discussed visual changes in the server, noting a GTA theme, altered names, and a moving 5-second setting.
+* **Casual Chat:** `myuuucel.` briefly asked for `zoelart`'s opinion on furries.
+
+### Important Events and Announcements
+* No formal announcements or scheduled events were made.
+
+### Community Questions and Concerns
+* **Bot Access:** `zoelart` was concerned about why they could not access or run the `/summary` command.
+* **Reverting Settings:** `zoelart` asked how to revert the animated 5-second setting back to normal.
+* **Feature Application:** `myuuucel.` suggested applying the new theme/visual changes to everyone.
+
+### Decisions or Conclusions
+* No technical fixes or resolutions were reached regarding the bot access or settings, with `myuuucel.` stating they did not know how to fix the issues.
+
+### Interesting Community Interactions
+* When `zoelart` asked why the summary wasn't working, `myuuucel.` jokingly brushed off the question (""ya ga tau kok tanya saya"" / ""I don't know, why ask me?""), which `zoelart` found amusing.
+* `myuuucel.` randomly asked `zoelart` ""wdyt about furry"", prompting `zoelart` to reply enthusiastically with ""Furry for life"".","23","1","2026-11-19T09:19:25.969Z"

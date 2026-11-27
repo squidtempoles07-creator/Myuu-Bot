@@ -1,0 +1,18 @@
+"summary_id","guild_id","guild_name","selected_channels","period_start","period_end","total_messages","human_messages","bot_messages","unique_users","messages_with_attachments","edited_messages","channel_statistics","top_contributors","summary","processed_messages","processed_chunks","created_at"
+"366b4c84-4f80-4cee-9d9a-4360fce04a97","609598759302594565","Lunar Coffee Shop","[{""id"":""790515926515712040"",""name"":""bot-music-spam""}]","2026-10-23T00:00:00.000Z","2026-10-25T23:59:59.999Z","54","28","26","3","0","1","[{""channelId"":""790515926515712040"",""channelName"":""bot-music-spam"",""messageCount"":54}]","[{""authorId"":""427692246502998016"",""authorName"":""albro26"",""messageCount"":17},{""authorId"":""428519138445754378"",""authorName"":""zoelart"",""messageCount"":10},{""authorId"":""215321881329270784"",""authorName"":""foster.21"",""messageCount"":1}]","Here is a factual summary of the provided Discord conversation:
+
+### Main Topics and Discussions
+* **Music Bot Commands:** The entirety of the conversation revolves around server members testing and executing commands for music bots (specifically **Jockie Music**, **Jockie Music (1)**, and **Bongo**). 
+* **Bot Prefixes and Setup:** Users (`albro26`, `zoelart`, `foster.21`) attempted various command prefixes (`-`, `+`, `m!`) to interact with the bots, requesting songs such as ""please do not lean daniel,"" ""heal the world,"" ""gunslinger,"" ""mardua holong,"" ""rap god,"" and ""kaminomanimani.""
+
+### Important Events and Announcements
+* **Level Up:** The bot **MEE6** announced that `albro26` advanced to level 13 on October 25, 2026.
+
+### Community Questions, Concerns, and Issues
+* **Music Playback Failures:** The **Bongo** bot reported multiple errors, including being unable to find specified titles (""please do not lean daniel"", ""watame lullaby but lofi for 1 hours"") and noting that a requested YouTube video link could not be found or might not be available in its country.
+
+### Decisions or Conclusions
+* Users adjusted their bot commands to use `Jockie Music` instances after encountering issues with `Bongo` or unrecognized command prefixes.
+
+### Community Interactions
+* Server members primarily interacted with bots using music control commands (`play`, `join`, `stop`, `loop`). No casual chat or conversation between members took place.","54","1","2026-11-20T02:51:56.583Z"
