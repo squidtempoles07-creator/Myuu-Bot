@@ -21,6 +21,7 @@ import {
 
 import { generateCommunitySummary } from './services/summary.js';
 import { exportSummaryToCsv } from './services/csvExporter.js';
+import { sendSummaryToDashboard } from './services/dashboardApi.js';
 
 // Create an express app
 const app = express();
